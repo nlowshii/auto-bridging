@@ -11,8 +11,6 @@ import org.lwjgl.glfw.GLFW;
 public class AutoBridgeClient implements ClientModInitializer {
 
     public static KeyMapping toggleKey;
-
-    /** Whether auto-bridge is currently active. */
     public static boolean enabled = false;
 
     @Override
@@ -20,12 +18,11 @@ public class AutoBridgeClient implements ClientModInitializer {
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.autobridge.toggle",
                 InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_B, // default key, change in Controls menu
+                GLFW.GLFW_KEY_B,
                 "category.autobridge"
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            // consumeClick() drains the "was this key pressed since last tick" queue
             while (toggleKey.consumeClick()) {
                 enabled = !enabled;
                 if (client.player != null) {
