@@ -62,7 +62,7 @@ public class AutoBridgeHandler {
 
         BlockHitResult hitResult = new BlockHitResult(hitVec, placeAgainst, supportPos, false);
 
-        client.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hitResult);
+        client.gameMode.useItemOn(player, client.level, InteractionHand.MAIN_HAND, hitResult);
         player.swing(InteractionHand.MAIN_HAND);
     }
 }
