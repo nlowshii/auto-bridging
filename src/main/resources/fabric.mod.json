@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "autobridge",
+  "version": "${version}",
+  "name": "Auto Bridge",
+  "description": "Toggleable auto-bridge utility with a custom keybind.",
+  "authors": ["lowsii"],
+  "contact": {
+    "homepage": "https://github.com/nlowshii"
+  },
+  "license": "MIT",
+  "icon": "assets/autobridge/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.lowsii.autobridge.AutoBridgeClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~26.1",
+    "fabric-api": "*",
+    "java": ">=25"
+  }
+}
