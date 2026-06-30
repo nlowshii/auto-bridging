@@ -12,16 +12,11 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-
-    // Minecraft 26.1+ no longer ships obfuscated jars, so Fabric Loom no longer
-    // remaps Minecraft or mods. That means there is NO mappings{} block, and
-    // NO modImplementation/modCompileOnly — just plain implementation/compileOnly.
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 java {
-    // Minecraft 26.1+ requires Java 25 for the Gradle JVM / toolchain
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
