@@ -11,21 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-/**
- * Very small, "legit" style auto-bridge:
- * every client tick, if the block under the player's feet is a gap and the
- * player is holding a block, it looks at the gap and places a block there.
- *
- * It does NOT fake rotations server-side (no silent/packet rotation) — the
- * player's actual view is turned to face the placement, same as a manual
- * bridge, just automated. This keeps it closer to a QoL utility instead of
- * something built to dodge anti-cheat detection.
- *
- * NOTE: many multiplayer servers treat any automated block placement as
- * cheating regardless of how "legit" it looks, even on servers without strict
- * anti-cheat. Use this on singleplayer / your own server / places that
- * explicitly allow it.
- */
 public class AutoBridgeHandler {
 
     public static void tick(Minecraft client) {
@@ -36,25 +21,23 @@ public class AutoBridgeHandler {
 
         ItemStack held = player.getMainHandItem();
         if (!(held.getItem() instanceof BlockItem)) {
-            return; // nothing placeable in hand
+            return;
         }
 
         BlockPos feet = player.blockPosition();
         BlockPos underFeet = feet.below();
 
         if (!client.level.getBlockState(underFeet).isAir()) {
-            return; // already standing on solid ground, nothing to bridge yet
+            return;
         }
 
-        // Bridge in the direction the player is walking backwards away from
         Direction facing = Direction.fromYRot(player.getYRot());
         BlockPos target = underFeet.relative(facing.getOpposite());
 
         if (!client.level.getBlockState(target).isAir()) {
-            return; // target already occupied
+            return;
         }
 
-        // Find a solid neighbour of the target block to place against
         Direction placeAgainst = null;
         BlockPos supportPos = null;
         for (Direction dir : Direction.values()) {
@@ -66,7 +49,7 @@ public class AutoBridgeHandler {
             }
         }
         if (placeAgainst == null) {
-            return; // no support yet, keep walking until one exists
+            return;
         }
 
         Vec3 hitVec = new Vec3(
@@ -75,7 +58,6 @@ public class AutoBridgeHandler {
                 target.getZ() + 0.5
         );
 
-        // Turn the player's actual view towards the placement spot
         player.lookAt(EntityAnchorArgument.Anchor.EYES, hitVec);
 
         BlockHitResult hitResult = new BlockHitResult(hitVec, placeAgainst, supportPos, false);
