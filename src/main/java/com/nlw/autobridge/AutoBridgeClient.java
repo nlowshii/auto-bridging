@@ -11,12 +11,20 @@ import org.lwjgl.glfw.GLFW;
 
 public class AutoBridgeClient implements ClientModInitializer {
 
+    public enum BridgeMode {
+        CLASSIC,
+        DIAGONAL
+    }
+
     private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath("autobridge", "main")
     );
 
     public static KeyMapping toggleKey;
+    public static KeyMapping modeKey;
+
     public static boolean enabled = false;
+    public static BridgeMode mode = BridgeMode.CLASSIC;
 
     @Override
     public void onInitializeClient() {
@@ -27,12 +35,28 @@ public class AutoBridgeClient implements ClientModInitializer {
                 CATEGORY
         ));
 
+        modeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.autobridge.mode",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_N,
+                CATEGORY
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleKey.consumeClick()) {
                 enabled = !enabled;
                 if (client.player != null) {
                     client.player.sendSystemMessage(
                             Component.literal("[AutoBridge] " + (enabled ? "ON" : "OFF"))
+                    );
+                }
+            }
+
+            while (modeKey.consumeClick()) {
+                mode = mode == BridgeMode.CLASSIC ? BridgeMode.DIAGONAL : BridgeMode.CLASSIC;
+                if (client.player != null) {
+                    client.player.sendSystemMessage(
+                            Component.literal("[AutoBridge] Mode: " + mode.name())
                     );
                 }
             }
