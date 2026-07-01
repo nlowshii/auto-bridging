@@ -2,17 +2,16 @@ package com.lowsii.autobridge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.entity.monster.Spider;
-import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.monster.Piglin;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
-import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.monster.spider.CaveSpider;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
