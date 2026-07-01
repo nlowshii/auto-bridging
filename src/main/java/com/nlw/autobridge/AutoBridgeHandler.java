@@ -37,8 +37,8 @@ public class AutoBridgeHandler {
         }
 
         BlockPos feet = new BlockPos(rawFeet.getX(), groundY, rawFeet.getZ());
-        Direction moveDir = getMovementDirection(player);
-        BlockPos aheadFoot = feet.relative(moveDir);
+        int[] offset = getMovementOffset(player);
+        BlockPos aheadFoot = feet.offset(offset[0], 0, offset[1]);
 
         BlockPos[] candidates = {
                 feet.below(),
@@ -86,16 +86,46 @@ public class AutoBridgeHandler {
         return true;
     }
 
-    private static Direction getMovementDirection(LocalPlayer player) {
+    /**
+     * Returns a horizontal offset {dx, dz}, each in {-1, 0, 1}, based on the
+     * player's actual movement vector. In CLASSIC mode this snaps to one of
+     * the 4 cardinal directions; in DIAGONAL mode it snaps to one of the 8
+     * compass octants. Falls back to facing direction when not moving.
+     */
+    private static int[] getMovementOffset(LocalPlayer player) {
         double dx = player.getDeltaMovement().x;
         double dz = player.getDeltaMovement().z;
         double horizontalSpeedSq = dx * dx + dz * dz;
 
+        float yaw;
         if (horizontalSpeedSq > MOVE_THRESHOLD_SQ) {
-            float moveYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-            return Direction.fromYRot(moveYaw);
+            yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+        } else {
+            yaw = player.getYRot();
         }
 
-        return Direction.fromYRot(player.getYRot());
+        double normalized = ((yaw % 360) + 360) % 360;
+
+        if (AutoBridgeClient.mode == AutoBridgeClient.BridgeMode.CLASSIC) {
+            int quadrant = (int) Math.round(normalized / 90.0) % 4;
+            return switch (quadrant) {
+                case 0 -> new int[]{0, 1};
+                case 1 -> new int[]{-1, 0};
+                case 2 -> new int[]{0, -1};
+                default -> new int[]{1, 0};
+            };
+        }
+
+        int octant = (int) Math.round(normalized / 45.0) % 8;
+        return switch (octant) {
+            case 0 -> new int[]{0, 1};
+            case 1 -> new int[]{-1, 1};
+            case 2 -> new int[]{-1, 0};
+            case 3 -> new int[]{-1, -1};
+            case 4 -> new int[]{0, -1};
+            case 5 -> new int[]{1, -1};
+            case 6 -> new int[]{1, 0};
+            default -> new int[]{1, 1};
+        };
     }
 }
