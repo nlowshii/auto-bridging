@@ -22,9 +22,11 @@ public class AutoBridgeClient implements ClientModInitializer {
 
     public static KeyMapping toggleKey;
     public static KeyMapping modeKey;
+    public static KeyMapping attackToggleKey;
 
     public static boolean enabled = false;
     public static BridgeMode mode = BridgeMode.CLASSIC;
+    public static boolean attackEnabled = false;
 
     @Override
     public void onInitializeClient() {
@@ -39,6 +41,13 @@ public class AutoBridgeClient implements ClientModInitializer {
                 "key.autobridge.mode",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_N,
+                CATEGORY
+        ));
+
+        attackToggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.autobridge.attack_toggle",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_M,
                 CATEGORY
         ));
 
@@ -61,8 +70,21 @@ public class AutoBridgeClient implements ClientModInitializer {
                 }
             }
 
+            while (attackToggleKey.consumeClick()) {
+                attackEnabled = !attackEnabled;
+                if (client.player != null) {
+                    client.player.sendSystemMessage(
+                            Component.literal("[AutoAttack] " + (attackEnabled ? "ON" : "OFF"))
+                    );
+                }
+            }
+
             if (enabled) {
                 AutoBridgeHandler.tick(client);
+            }
+
+            if (attackEnabled) {
+                AutoAttackHandler.tick(client);
             }
         });
     }
