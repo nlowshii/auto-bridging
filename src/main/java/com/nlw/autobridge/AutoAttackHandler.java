@@ -8,16 +8,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
-/**
- * Turns the player's actual camera towards a nearby hostile mob, or a
- * neutral mob that is currently targeting the player, and attacks it.
- * The camera really turns (visible rotation, no packet spoofing), same
- * philosophy as AutoBridgeHandler.
- */
 public class AutoAttackHandler {
 
     private static final double RANGE = 3.0;
@@ -33,8 +32,6 @@ public class AutoAttackHandler {
         if (target == null) {
             return;
         }
-
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, target.position().add(0, target.getBbHeight() / 2.0, 0));
 
         if (player.getAttackStrengthScale(0.0f) < ATTACK_STRENGTH_THRESHOLD) {
             return;
@@ -56,7 +53,7 @@ public class AutoAttackHandler {
                 continue;
             }
 
-            boolean isHostile = living instanceof Enemy;
+            boolean isHostile = living instanceof Enemy && !isConditionallyNeutral(living);
             boolean isRetaliating = living instanceof Mob mob && mob.getTarget() == player;
 
             if (!isHostile && !isRetaliating) {
@@ -71,5 +68,13 @@ public class AutoAttackHandler {
         }
 
         return closest;
+    }
+
+    private static boolean isConditionallyNeutral(LivingEntity living) {
+        return living instanceof EnderMan
+                || living instanceof Piglin
+                || living instanceof ZombifiedPiglin
+                || living instanceof Spider
+                || living instanceof CaveSpider;
     }
 }
