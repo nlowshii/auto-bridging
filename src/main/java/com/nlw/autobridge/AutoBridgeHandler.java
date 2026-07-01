@@ -15,6 +15,8 @@ public class AutoBridgeHandler {
 
     private static final double MOVE_THRESHOLD_SQ = 0.0009;
 
+    private static int groundY = Integer.MIN_VALUE;
+
     public static void tick(Minecraft client) {
         LocalPlayer player = client.player;
         if (player == null || client.level == null || client.gameMode == null) {
@@ -26,14 +28,33 @@ public class AutoBridgeHandler {
             return;
         }
 
+        BlockPos rawFeet = player.blockPosition();
+
+        if (player.onGround()) {
+            groundY = rawFeet.getY();
+        } else if (groundY == Integer.MIN_VALUE) {
+            groundY = rawFeet.getY();
+        }
+
+        BlockPos feet = new BlockPos(rawFeet.getX(), groundY, rawFeet.getZ());
         Direction moveDir = getMovementDirection(player);
-
-        BlockPos feet = player.blockPosition();
         BlockPos aheadFoot = feet.relative(moveDir);
-        BlockPos target = aheadFoot.below();
 
+        BlockPos[] candidates = {
+                feet.below(),
+                aheadFoot.below()
+        };
+
+        for (BlockPos target : candidates) {
+            if (tryPlace(client, player, target)) {
+                return;
+            }
+        }
+    }
+
+    private static boolean tryPlace(Minecraft client, LocalPlayer player, BlockPos target) {
         if (!client.level.getBlockState(target).isAir()) {
-            return;
+            return false;
         }
 
         Direction placeAgainst = null;
@@ -47,7 +68,7 @@ public class AutoBridgeHandler {
             }
         }
         if (placeAgainst == null) {
-            return;
+            return false;
         }
 
         Vec3 hitVec = new Vec3(
@@ -62,6 +83,7 @@ public class AutoBridgeHandler {
 
         client.gameMode.useItemOn(player, InteractionHand.MAIN_HAND, hitResult);
         player.swing(InteractionHand.MAIN_HAND);
+        return true;
     }
 
     private static Direction getMovementDirection(LocalPlayer player) {
