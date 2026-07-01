@@ -13,6 +13,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class AutoBridgeHandler {
 
+    private static final double MOVE_THRESHOLD_SQ = 0.0009;
+
     public static void tick(Minecraft client) {
         LocalPlayer player = client.player;
         if (player == null || client.level == null || client.gameMode == null) {
@@ -24,15 +26,11 @@ public class AutoBridgeHandler {
             return;
         }
 
+        Direction moveDir = getMovementDirection(player);
+
         BlockPos feet = player.blockPosition();
-        BlockPos underFeet = feet.below();
-
-        if (!client.level.getBlockState(underFeet).isAir()) {
-            return;
-        }
-
-        Direction facing = Direction.fromYRot(player.getYRot());
-        BlockPos target = underFeet.relative(facing.getOpposite());
+        BlockPos aheadFoot = feet.relative(moveDir);
+        BlockPos target = aheadFoot.below();
 
         if (!client.level.getBlockState(target).isAir()) {
             return;
@@ -64,5 +62,18 @@ public class AutoBridgeHandler {
 
         client.gameMode.useItemOn(player, client.level, InteractionHand.MAIN_HAND, hitResult);
         player.swing(InteractionHand.MAIN_HAND);
+    }
+
+    private static Direction getMovementDirection(LocalPlayer player) {
+        double dx = player.getDeltaMovement().x;
+        double dz = player.getDeltaMovement().z;
+        double horizontalSpeedSq = dx * dx + dz * dz;
+
+        if (horizontalSpeedSq > MOVE_THRESHOLD_SQ) {
+            float moveYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+            return Direction.fromYRot(moveYaw);
+        }
+
+        return Direction.fromYRot(player.getYRot());
     }
 }
